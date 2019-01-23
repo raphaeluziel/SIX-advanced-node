@@ -14,14 +14,15 @@
     "express": "^4.16.4",
     "cors": "^2.8.5",
     "body-parser": "^1.18.3",
-    "mongodb": "^3.1.11",
+    "mongodb": "^2.2.22",
     "helmet": "^3.15.0",
-    "pug": "^2.0.0",
+    "pug": "^2.0.3",
     "passport": "^0.4.0",
-    "express-session": "^1.15.6"
+    "express-session": "^1.15.6",
+    "passport-local": "^1.0.0"
   },
   "engines": {
-    "node": "4.4.3"
+    "node": "10.15.0"
   },
   "repository": {
     "type": "git",
