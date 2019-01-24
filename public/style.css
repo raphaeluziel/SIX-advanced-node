@@ -1,3 +1,12 @@
+body{
+  margin: 0px 60px;
+  background-color: pink;
+}
+
+input{
+  margin: 4px;
+}
+
 .border {
   border-style: inset;
   border-width: 1px;

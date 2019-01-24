@@ -6,11 +6,13 @@ html
     meta(charset='utf-8')
     meta(http-equiv='X-UA-Compatible', content='IE=edge')
     meta(name='viewport', content='width=device-width, initial-scale=1')
+    link(rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous")
     link(rel='stylesheet', href='/public/style.css')
   body
     h1.border.center FCC Advanced Node and Express
     //add your code below, make sure its indented at this level
-    
+    h2.center#welcome Welcome #{username}!
+    a(href='/logout') Logout
         
     script(src='https://code.jquery.com/jquery-2.2.1.min.js', integrity='sha256-gvQgAFzTH6trSrAWoH1iPo9Xc96QxSZ3feW6kem+O00=', crossorigin='anonymous')
     script(src='/public/client.js')
