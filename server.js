@@ -7,7 +7,8 @@ const passport      = require('passport');
 const LocalStrategy = require('passport-local');
 const ObjectID      = require('mongodb').ObjectID;
 const mongo         = require('mongodb').MongoClient;
-const fccTesting  =   require('./freeCodeCamp/fcctesting.js');
+const bcrypt        = require('bcrypt');
+const fccTesting    =   require('./freeCodeCamp/fcctesting.js');
 
 const app = express();
 
@@ -60,9 +61,12 @@ mongo.connect(process.env.DATABASE, { useNewUrlParser: true }, (err, client) => 
           // User is not in the database
           if (!user) { return done(null, false); }
           // User is in database, but provided incorrect password
-          if (password !== user.password) { return done(null, false); }
-          // User is validated
-          return done(null, user);
+          
+          // Works, but does not pass fcc tests which need a synced hash process
+          bcrypt.compare(password, user.password, function(err, res) {
+            (res) ? done(null, user) : done(null, false)
+          });
+          
         });
       }
     ));
@@ -114,14 +118,20 @@ mongo.connect(process.env.DATABASE, { useNewUrlParser: true }, (err, client) => 
         else if (user) {res.redirect('/');} 
         // user does not exist, add user to database
         else {
-          db.collection('users').insertOne(
-            {username: req.body.username, password: req.body.password},
+          // Generate a hash for the password
+          // Method works but does not pass fcc tests since they use synced hashing
+          const saltRounds = 12;
+          var hash = bcrypt.hash(req.body.password, saltRounds, function(err, hash) {
+            // Store hash in database
+            db.collection('users').insertOne(
+            {username: req.body.username, password: hash},
             (err, doc) => {
               // If error querying database go home, otherwise go to the next step
               if(err) {res.redirect('/');}
               else {next(null, user);}
             }
           )
+          });       
         }
       })},
             // Authenticate user and send to profile page, or 
