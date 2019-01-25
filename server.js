@@ -67,11 +67,11 @@ mongo.connect(process.env.DATABASE, { useNewUrlParser: true }, (err, client) => 
       }
     ));
     
+    // Function to prevent user from just going to profile page directly
+    // without being authenticated at the login page
     function ensureAuthenticated(req, res, next) {
       if (req.isAuthenticated()) {
-        console.log("ensuring");
         return next();
-        //res.redirect('/profile');
       }
       res.redirect('/');
     };
@@ -91,10 +91,12 @@ mongo.connect(process.env.DATABASE, { useNewUrlParser: true }, (err, client) => 
     });
     
     app.route('/login').post(
-             passport.authenticate('local', { failureRedirect: '/' }),
-             function(req, res) {
-      res.redirect('/profile');
-    });
+      // If user is not authenticated, send back home
+      passport.authenticate('local', { failureRedirect: '/' }),
+      // Otherwise send to their profile page
+      function(req, res) {
+        res.redirect('/profile');
+      });
     
     app.route('/logout')
       .get((req, res) => {
@@ -103,38 +105,41 @@ mongo.connect(process.env.DATABASE, { useNewUrlParser: true }, (err, client) => 
     });
     
     app.route('/register')
-  .post((req, res, next) => {
+      .post((req, res, next) => {
+      // Query database for user
       db.collection('users').findOne({ username: req.body.username }, function (err, user) {
-          if(err) {
-              next(err);
-          } else if (user) {
-              res.redirect('/');
-          } else {
-              db.collection('users').insertOne(
-                {username: req.body.username,
-                 password: req.body.password},
-                (err, doc) => {
-                    if(err) {
-                        res.redirect('/');
-                    } else {
-                        next(null, user);
-                    }
-                }
-              )
-          }
+        // error querying the database
+        if(err) {next(err);} 
+        // user exists, go back to home page
+        else if (user) {res.redirect('/');} 
+        // user does not exist, add user to database
+        else {
+          db.collection('users').insertOne(
+            {username: req.body.username, password: req.body.password},
+            (err, doc) => {
+              // If error querying database go home, otherwise go to the next step
+              if(err) {res.redirect('/');}
+              else {next(null, user);}
+            }
+          )
+        }
       })},
-    passport.authenticate('local', { failureRedirect: '/' }),
-    (req, res, next) => {
-        res.redirect('/profile');
-    }
-);
+            // Authenticate user and send to profile page, or 
+            // if user user is not authenticated go back home
+            passport.authenticate('local', { failureRedirect: '/' }),
+            (req, res, next) => {res.redirect('/profile');}
+           );
     
     app.route('/profile')
-      .get(ensureAuthenticated, (req, res) => { console.log("HEY", req.user.username);
+    // call ensureAuthenticated to make sure user is accessing profile page
+    // by starting at login, and not just entering the url manually
+      .get(ensureAuthenticated, (req, res) => {
       res.render(process.cwd() + '/views/pug/profile',
+                 // send username to profile pug
                  {username: req.user.username});
     });
     
+    // Handles missing pages
     app.use((req, res, next) => {
       res.status(404)
         .type('text')
